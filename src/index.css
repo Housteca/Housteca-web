@@ -3,3 +3,63 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+/* Split the screen in half */
+.split {
+  height: 100%;
+  width: 50%;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+/* Control the left side */
+.left {
+  left: 0;
+  background-color: #595959;
+}
+
+/* Control the right side */
+.right {
+  right: 0;
+  background-color: #ffab40;
+}
+
+/* If you want the content centered horizontally and vertically */
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-weight: 900;
+  color: white;
+}
+/* Href link styling */
+a:link {
+  text-decoration: none;
+}
+a:visited {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+a:active {
+  text-decoration: underline;
+}
+/* Split the screen in half */
+.listItem {
+  width: 90%;
+  position: relative;
+  margin: 5% 0 0 5%;
+  background-color: #595959;
+  color:white;
+  font-weight: 900;
+}
+.listImg {
+  width: 30%;
+  position: fixed;
+  left: 0;
+}
