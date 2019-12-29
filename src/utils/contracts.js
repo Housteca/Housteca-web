@@ -1,10 +1,10 @@
-import Loan from "../contracts/Loan";
+import Investment from "../contracts/Investment";
 import Housteca from "../contracts/Housteca";
 import getWeb3 from "./getWeb3";
 
 const cache = {};
 
-const getContract = async (contract) => {
+const getContract = async contract => {
     const contractName = contract.contractName;
     try {
         if (cache[contractName]) {
@@ -25,4 +25,4 @@ const getContract = async (contract) => {
 };
 
 export const getHoustecaContract = async () => await getContract(Housteca);
-export const getLoanContract = async () => await getContract(Loan);
+export const getInvestmentContract = async () => await getContract(Investment);

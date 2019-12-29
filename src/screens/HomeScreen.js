@@ -1,17 +1,34 @@
 import React from 'react';
-import {withRouter} from "react-router-dom";
+import { withRouter } from "react-router-dom";
+import { List } from "semantic-ui-react";
+import { getHoustecaContract } from "../utils/contracts";
 
 
 class HomeScreen extends React.Component {
-    componentDidMount() {
-        // TODO: determine whether the user is a borrower or an investor and navigate to the next screen
-    }
+    state = {loans: [], contract: null};
+
+    componentDidMount = async () => {
+        const contract = await getHoustecaContract();
+        const loans = await contract.methods.loans().call();
+        console.log(loans);
+        this.setState({contract, loans});
+    };
+
+    renderItems = () => {
+        return this.state.loans.map(loan => {
+            return (
+                <List.Item>
+                    loan
+                </List.Item>
+            );
+        });
+    };
 
     render() {
         return (
-            <div>
-                <h1>HOME SCREEN</h1>
-            </div>
+            <List divided relaxed>
+                {this.renderItems()}
+            </List>
         );
     }
 }
