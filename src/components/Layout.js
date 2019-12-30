@@ -6,19 +6,23 @@ import {
     Segment
 } from "semantic-ui-react";
 import {
-    BrowserRouter,
+    Router,
     Route,
     Switch
 } from "react-router-dom";
 import { createBrowserHistory } from "history";
 import HomeScreen from "../screens/HomeScreen";
+import CreateInvestmentProposalScreen from "../screens/CreateInvestmentProposalScreen";
+import ViewInvestmentProposalsScreen from "../screens/ViewInvestmentProposalsScreen";
+import InvestmentDetailScreen from "../screens/InvestmentDetailScreen";
 
 
 class Layout extends React.Component {
-    state = {activeItem: 1};
+    state = {activeItem: 2};
     history = createBrowserHistory();
     items = [
-        {title: 'new investment', path: '/new'},
+        {title: 'new investment proposal', path: '/new'},
+        {title: 'investment proposals', path: '/proposals'},
         {title: 'investments', path: '/'},
         {title: 'admin', path: '/admin'},
     ];
@@ -30,13 +34,22 @@ class Layout extends React.Component {
     };
 
     renderItems = () => {
-        return this.items.map((item, index) => <Menu.Item
-            active={this.state.activeItem === index}
-            name={item.title}
-            key={item.title}
-            onClick={() => this.handleItemClick(index)}
-        />);
+        return this.items.map((item, index) =>
+            <Menu.Item
+                active={this.state.activeItem === index}
+                name={item.title}
+                key={item.title}
+                onClick={() => this.handleItemClick(index)}
+            />
+        );
     };
+
+    componentDidMount() {
+        const index = this.items.map(i => i.path).indexOf(this.history.location.pathname);
+        if (index >= 0) {
+            this.setState({activeItem: index});
+        }
+    }
 
     render() {
         return (
@@ -50,13 +63,22 @@ class Layout extends React.Component {
                     </Grid.Column>
                     <Grid.Column width={13}>
                         <Segment>
-                            <BrowserRouter history={this.history}>
+                            <Router history={this.history}>
                                 <Switch>
+                                    <Route path="/new">
+                                        <CreateInvestmentProposalScreen/>
+                                    </Route>
+                                    <Route path="/proposals">
+                                        <ViewInvestmentProposalsScreen/>
+                                    </Route>
+                                    <Route path="/detail">
+                                        <InvestmentDetailScreen/>
+                                    </Route>
                                     <Route path="/">
                                         <HomeScreen/>
                                     </Route>
                                 </Switch>
-                            </BrowserRouter>
+                            </Router>
                         </Segment>
                     </Grid.Column>
                 </Grid>

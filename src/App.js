@@ -3,14 +3,13 @@ import Layout from "./components/Layout";
 import getWeb3 from "./utils/getWeb3";
 
 class App extends React.Component {
-    state = {web3: null, account: null, isOwner: false, contract: null};
+    reload() {
+        window.location.reload();
+    }
 
     componentDidMount = async () => {
         try {
-            // Get network provider and web3 instance.
             const web3 = await getWeb3();
-
-            // Use web3 to get the user's accounts.
             const accounts = await web3.eth.getAccounts();
             web3.eth.defaultAccount = accounts[0];
             web3.eth.transactionConfirmationBlocks = 1;
@@ -19,7 +18,11 @@ class App extends React.Component {
             // Refresh the state in case of metamask switching accounts
             web3.currentProvider.on('accountsChanged', () => {
                 console.log('Switching accounts');
-                window.location.reload();
+                this.reload();
+            });
+            web3.currentProvider.on('networkChanged', () => {
+                console.log('Switching network');
+                this.reload();
             });
         } catch (error) {
             // Catch any errors for any of the above operations.
