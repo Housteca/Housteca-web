@@ -15,16 +15,17 @@ import HomeScreen from "../screens/HomeScreen";
 import CreateInvestmentProposalScreen from "../screens/CreateInvestmentProposalScreen";
 import ViewInvestmentProposalsScreen from "../screens/ViewInvestmentProposalsScreen";
 import InvestmentDetailScreen from "../screens/InvestmentDetailScreen";
+import AdminScreen from "../screens/AdminScreen";
 
 
 class Layout extends React.Component {
     state = {activeItem: 2};
     history = createBrowserHistory();
     items = [
-        {title: 'new investment proposal', path: '/new'},
-        {title: 'investment proposals', path: '/proposals'},
-        {title: 'investments', path: '/'},
-        {title: 'admin', path: '/admin'},
+        {title: 'nueva proposición de financiación', path: '/new'},
+        {title: 'proposiciones de financiación', path: '/proposals'},
+        {title: 'inversiones', path: '/'},
+        {title: 'administración', path: '/admin'},
     ];
 
     handleItemClick = index => {
@@ -73,6 +74,9 @@ class Layout extends React.Component {
                                     </Route>
                                     <Route path="/detail">
                                         <InvestmentDetailScreen/>
+                                    </Route>
+                                    <Route path="/admin">
+                                        <AdminScreen/>
                                     </Route>
                                     <Route path="/">
                                         <HomeScreen/>

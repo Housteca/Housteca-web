@@ -2,7 +2,7 @@ import Web3 from "web3";
 
 let cachedWeb3 = null;
 
-const getWeb3 = () =>
+export const getWeb3 = () =>
     new Promise((resolve, reject) => {
         if (cachedWeb3) {
             resolve(cachedWeb3);
@@ -44,4 +44,8 @@ const getWeb3 = () =>
     });
 
 
-export default getWeb3;
+export const getDefaultAccount = async () => {
+    const web3 = await getWeb3();
+    const accounts = await web3.eth.getAccounts();
+    return accounts[0];
+};

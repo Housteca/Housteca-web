@@ -1,6 +1,6 @@
 import React from "react";
 import Layout from "./components/Layout";
-import getWeb3 from "./utils/getWeb3";
+import { getWeb3 } from "./utils/web3";
 
 class App extends React.Component {
     reload() {

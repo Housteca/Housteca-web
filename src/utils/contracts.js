@@ -1,6 +1,6 @@
 import Investment from "../contracts/Investment";
 import Housteca from "../contracts/Housteca";
-import getWeb3 from "./getWeb3";
+import { getWeb3 } from "./web3";
 
 const cache = {};
 
@@ -19,7 +19,7 @@ const getContract = async contract => {
         );
         cache[contractName] = instance;
         return instance;
-    } catch(e) {
+    } catch (e) {
         console.error(e);
     }
 };

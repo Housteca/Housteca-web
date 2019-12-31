@@ -5,7 +5,7 @@ import {
     Menu
 } from "semantic-ui-react";
 import icon from '../images/housteca.jpeg';
-import getWeb3 from "../utils/getWeb3";
+import { getWeb3 } from "../utils/web3";
 
 
 class AppHeader extends React.Component {
@@ -24,7 +24,7 @@ class AppHeader extends React.Component {
             <Menu>
                 <Menu.Item>
                     <Header as="h1">
-                        <Image src={icon} />
+                        <Image src={icon}/>
                     </Header>
                 </Menu.Item>
                 <Menu.Menu position="right">
