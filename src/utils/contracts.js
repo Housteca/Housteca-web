@@ -1,4 +1,4 @@
-import Investment from "../contracts/Investment";
+import Loan from "../contracts/Loan";
 import Housteca from "../contracts/Housteca";
 import { getWeb3 } from "./web3";
 
@@ -25,4 +25,4 @@ const getContract = async contract => {
 };
 
 export const getHoustecaContract = async () => await getContract(Housteca);
-export const getInvestmentContract = async () => await getContract(Investment);
+export const getLoanContract = async () => await getContract(Loan);
