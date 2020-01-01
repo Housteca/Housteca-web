@@ -50,4 +50,7 @@ export const getDefaultAccount = async () => {
     return accounts[0];
 };
 
-export const toUint256 = s => (s * 1e18).toLocaleString('fullwide', {useGrouping:false});
+export const toAmount = s => (s * 1e18).toLocaleString('fullwide', {useGrouping:false});
+export const fromAmount = s => (parseFloat(s) / 1e18).toFixed(2);
+export const toRatio = s => (s * 1e16).toLocaleString('fullwide', {useGrouping:false});
+export const fromRatio = s => (parseFloat(s) / 1e16).toFixed(2);

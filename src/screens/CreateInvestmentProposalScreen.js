@@ -2,13 +2,14 @@ import React from 'react';
 import { getHoustecaContract } from "../utils/contracts";
 import {
     getDefaultAccount,
-    getWeb3,
-    toUint256
+    toAmount,
+    toRatio
 } from "../utils/web3";
 import {
     Button,
     Form
 } from "semantic-ui-react";
+import { withRouter } from "react-router-dom";
 
 
 class CreateInvestmentProposalScreen extends React.Component {
@@ -21,8 +22,7 @@ class CreateInvestmentProposalScreen extends React.Component {
         targetAmount: 0,
         totalPayments: 0,
         insuredPayments: 0,
-        paymentAmount: 0,
-        perPaymentInterestRatio: 0,
+        yearlyInterest: 0,
     };
 
     componentDidMount = async () => {
@@ -34,17 +34,24 @@ class CreateInvestmentProposalScreen extends React.Component {
 
     submitForm = async () => {
         const account = await getDefaultAccount();
-        const {borrower, symbol, downpaymentRatio, targetAmount, totalPayments, insuredPayments, paymentAmount, perPaymentInterestRatio} = this.state;
-        this.state.contract.methods.createInvestmentProposal(
+        const {
+            borrower, symbol, downpaymentRatio, targetAmount,
+            totalPayments, insuredPayments, yearlyInterest
+        } = this.state;
+        const perPaymentInterestRatio = yearlyInterest / 12;
+        const paymentAmount = (targetAmount * perPaymentInterestRatio/100) / (1 - Math.pow(1 + perPaymentInterestRatio/100, -totalPayments));
+        console.log(paymentAmount);
+        await this.state.contract.methods.createInvestmentProposal(
             borrower,
             symbol,
-            toUint256(downpaymentRatio / 100),
-            toUint256(targetAmount),
+            toRatio(downpaymentRatio),
+            toAmount(targetAmount),
             totalPayments,
             insuredPayments,
-            toUint256(paymentAmount),
-            toUint256(perPaymentInterestRatio)
+            toAmount(paymentAmount),
+            toRatio(perPaymentInterestRatio)
         ).send({from: account});
+        this.props.history.push('/proposals');
     };
 
     renderForm() {
@@ -52,7 +59,7 @@ class CreateInvestmentProposalScreen extends React.Component {
             return <p>Acceso denegado a esta sección</p>
         }
         return (
-            <Form>
+            <Form style={{width: '40%'}}>
                 <Form.Field
                     label='Dirección del prestatario'
                     control='input'
@@ -93,17 +100,10 @@ class CreateInvestmentProposalScreen extends React.Component {
                     onChange={event => this.setState({insuredPayments: event.target.value})}
                 />
                 <Form.Field
-                    label='Mensualidad a pagar en tokens'
-                    control='input'
-                    type="number"
-                    placeholder='500, 650, 1200...'
-                    onChange={event => this.setState({paymentAmount: event.target.value})}
-                />
-                <Form.Field
-                    label='Tasa de interés'
+                    label='Tasa de interés anual'
                     control='input'
                     placeholder='1.20%, 6.45%, 15%...'
-                    onChange={event => this.setState({perPaymentInterestRatio: event.target.value})}
+                    onChange={event => this.setState({yearlyInterest: event.target.value})}
                 />
                 <Form.Field control={Button} color="blue" onClick={this.submitForm}>
                     Crear proposición de financiación
@@ -119,4 +119,4 @@ class CreateInvestmentProposalScreen extends React.Component {
     }
 }
 
-export default CreateInvestmentProposalScreen;
+export default withRouter(CreateInvestmentProposalScreen);

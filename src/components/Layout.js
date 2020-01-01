@@ -2,12 +2,11 @@ import React from 'react';
 import AppHeader from "./AppHeader";
 import {
     Grid,
-    Menu,
-    Segment
+    Menu
 } from "semantic-ui-react";
 import {
-    Router,
     Route,
+    Router,
     Switch
 } from "react-router-dom";
 import { createBrowserHistory } from "history";
@@ -56,34 +55,32 @@ class Layout extends React.Component {
         return (
             <div>
                 <AppHeader/>
-                <Grid style={{padding: 15}}>
+                <Grid style={{padding: 15}} centered>
                     <Grid.Column width={2}>
                         <Menu fluid vertical tabular>
                             {this.renderItems()}
                         </Menu>
                     </Grid.Column>
                     <Grid.Column width={13}>
-                        <Segment>
-                            <Router history={this.history}>
-                                <Switch>
-                                    <Route path="/new">
-                                        <CreateInvestmentProposalScreen/>
-                                    </Route>
-                                    <Route path="/proposals">
-                                        <ViewInvestmentProposalsScreen/>
-                                    </Route>
-                                    <Route path="/detail">
-                                        <InvestmentDetailScreen/>
-                                    </Route>
-                                    <Route path="/admin">
-                                        <AdminScreen/>
-                                    </Route>
-                                    <Route path="/">
-                                        <HomeScreen/>
-                                    </Route>
-                                </Switch>
-                            </Router>
-                        </Segment>
+                        <Router history={this.history}>
+                            <Switch>
+                                <Route path="/new">
+                                    <CreateInvestmentProposalScreen/>
+                                </Route>
+                                <Route path="/proposals">
+                                    <ViewInvestmentProposalsScreen/>
+                                </Route>
+                                <Route path="/detail">
+                                    <InvestmentDetailScreen/>
+                                </Route>
+                                <Route path="/admin">
+                                    <AdminScreen/>
+                                </Route>
+                                <Route path="/">
+                                    <HomeScreen/>
+                                </Route>
+                            </Switch>
+                        </Router>
                     </Grid.Column>
                 </Grid>
             </div>

@@ -7,7 +7,10 @@ import {
 } from "semantic-ui-react";
 import ConfigurationField from "../components/ConfigurationField";
 import { getHoustecaContract } from "../utils/contracts";
-import { getDefaultAccount } from "../utils/web3";
+import {
+    getDefaultAccount,
+    toRatio
+} from "../utils/web3";
 
 
 class AdminScreen extends React.Component {
@@ -31,7 +34,7 @@ class AdminScreen extends React.Component {
         const contract = await getHoustecaContract();
         const defaultAccount = await getDefaultAccount();
         const isAdmin = await contract.methods.isAdmin(defaultAccount).call();
-        const houstecaFeeRatio = await contract.methods._houstecaFeeRatio().call() / 1e18;
+        const houstecaFeeRatio = await contract.methods._houstecaFeeRatio().call() / 1e16;
         this.setState({contract, defaultAccount, hasPermission: isAdmin, houstecaFeeRatio});
     };
 
@@ -42,7 +45,7 @@ class AdminScreen extends React.Component {
 
     addLocalNode = async () => {
         const {address, feeRatio} = this.state.newLocalNode;
-        const ratio = (feeRatio * 1e18).toString();
+        const ratio = toRatio(feeRatio);
         this.state.contract.methods.addAdmin(address, 253, ratio).send({from: this.state.defaultAccount});
     };
 
@@ -52,7 +55,7 @@ class AdminScreen extends React.Component {
     };
 
     changeHoustecaFeeRatio = async () => {
-        const ratio = (this.state.houstecaFeeRatio * 1e18).toString();
+        const ratio = toRatio(this.state.houstecaFeeRatio);
         this.state.contract.methods.setHoustecaFeeRatio(ratio).send({from: this.state.defaultAccount});
     };
 
@@ -71,9 +74,9 @@ class AdminScreen extends React.Component {
                                         defaultValue={newAdmin}/>
                     <br/>
                     <br/>
-                    <ConfigurationField placeholder="Housteca % fee"
+                    <ConfigurationField placeholder="Comisión"
                                         onChange={event => this.setState({houstecaFeeRatio: event.target.value})}
-                                        label="Fee % for Housteca"
+                                        label="% comisión for Housteca"
                                         type="number"
                                         onClick={this.changeHoustecaFeeRatio}
                                         defaultValue={houstecaFeeRatio}/>
@@ -129,10 +132,10 @@ class AdminScreen extends React.Component {
                             />
                             <Form.Field
                                 control={Input}
-                                label='Fee %'
+                                label='% comisión'
                                 size="big"
                                 type="number"
-                                placeholder='Fee % for the new local node'
+                                placeholder='% de comisión para el nodo local'
                                 onChange={event => this.setState({
                                     newLocalNode: {
                                         ...this.state.newLocalNode,
