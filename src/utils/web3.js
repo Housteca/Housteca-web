@@ -49,3 +49,5 @@ export const getDefaultAccount = async () => {
     const accounts = await web3.eth.getAccounts();
     return accounts[0];
 };
+
+export const toUint256 = s => (s * 1e18).toLocaleString('fullwide', {useGrouping:false});
