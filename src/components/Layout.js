@@ -55,7 +55,7 @@ class Layout extends React.Component {
         return (
             <div>
                 <AppHeader/>
-                <Grid style={{padding: 15}} centered>
+                <Grid style={{padding: 15}}>
                     <Grid.Column width={2}>
                         <Menu fluid vertical tabular>
                             {this.renderItems()}

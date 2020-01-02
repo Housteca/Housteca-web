@@ -19,6 +19,7 @@ class AdminScreen extends React.Component {
         contract: null,
         defaultAccount: '',
         newAdmin: '',
+        newInvestor: '',
         houstecaFeeRatio: 0,
         newLocalNode: {
             address: '',
@@ -43,6 +44,11 @@ class AdminScreen extends React.Component {
         this.state.contract.methods.addAdmin(address, 254, 0).send({from: this.state.defaultAccount});
     };
 
+    addInvestor = async () => {
+        const address = this.state.newInvestor;
+        this.state.contract.methods.addInvestor(address).send({from: this.state.defaultAccount});
+    };
+
     addLocalNode = async () => {
         const {address, feeRatio} = this.state.newLocalNode;
         const ratio = toRatio(feeRatio);
@@ -63,15 +69,20 @@ class AdminScreen extends React.Component {
         if (!this.state.hasPermission) {
             return <p>Acceso denegado a esta sección</p>
         }
-        const {newAdmin, houstecaFeeRatio} = this.state;
+        const {houstecaFeeRatio} = this.state;
         return (
             <Grid divided="vertically">
                 <Grid.Column width={5}>
                     <ConfigurationField placeholder="Dirección de Ethereum"
                                         onChange={event => this.setState({newAdmin: event.target.value})}
                                         label="Añadir un nuevo administrador"
-                                        onClick={this.addAdmin}
-                                        defaultValue={newAdmin}/>
+                                        onClick={this.addAdmin}/>
+                    <br/>
+                    <br/>
+                    <ConfigurationField placeholder="Dirección de Ethereum"
+                                        onChange={event => this.setState({newInvestor: event.target.value})}
+                                        label="Añadir un nuevo inversor"
+                                        onClick={this.addInvestor}/>
                     <br/>
                     <br/>
                     <ConfigurationField placeholder="Comisión"
@@ -110,7 +121,6 @@ class AdminScreen extends React.Component {
                                 })}
                             />
                         </Form.Group>
-                        <br/>
                         <Form.Field control={Button} color="blue" onClick={this.addToken}>Enviar</Form.Field>
                     </Form>
                     <br/>
@@ -144,7 +154,6 @@ class AdminScreen extends React.Component {
                                 })}
                             />
                         </Form.Group>
-                        <br/>
                         <Form.Field control={Button} color="blue" onClick={this.addLocalNode}>Enviar</Form.Field>
                     </Form>
                 </Grid.Column>
