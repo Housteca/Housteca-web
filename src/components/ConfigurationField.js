@@ -4,7 +4,7 @@ import { Input } from "semantic-ui-react";
 const ConfigurationField = props => {
     const {onClick, onChange, label, buttonTitle, placeholder, defaultValue, minWidth, type} = props;
     return (
-        <Input action={{onClick, content: buttonTitle || 'Change', color: 'blue'}}
+        <Input action={{onClick, content: buttonTitle || 'Enviar', color: 'blue'}}
                size={'big'}
                type={type || 'text'}
                onChange={onChange}
