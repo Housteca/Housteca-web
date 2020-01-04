@@ -50,7 +50,7 @@ class Layout extends React.Component {
     renderEvents = () => {
         return this.state.events.map(({title, description}) => {
             return (
-                <Card fluid>
+                <Card fluid key={title}>
                     <Card.Content>
                         <Card.Header>{title}</Card.Header>
                         <Card.Meta>{description}</Card.Meta>
@@ -89,8 +89,7 @@ class Layout extends React.Component {
                 case 'InvestmentProposalRemoved':
                     return {title: 'Proposición de inversión eliminada', description: data.borrower};
             }
-        })
-            .slice(0,20);
+        }).slice(0,20);
         this.setState({events: parsedEvents});
     };
 

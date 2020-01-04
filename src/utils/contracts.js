@@ -14,6 +14,7 @@ const getContract = async (contract, address) => {
 
 export const getHoustecaContract = async () => await getContract(Housteca);
 export const getLoanContract = async address => await getContract(Loan, address);
+export const parseDatetime = datetime => new Date(datetime * 1000).toISOString().split('T')[0];
 export const parseStatus = status => {
     switch(parseInt(status)) {
         case 0:  // AWAITING_STAKE

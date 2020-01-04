@@ -1,5 +1,8 @@
 import React from 'react';
-import { getHoustecaContract } from "../utils/contracts";
+import {
+    getHoustecaContract,
+    parseDatetime
+} from "../utils/contracts";
 import {
     Button,
     Card,
@@ -88,7 +91,7 @@ class ViewInvestmentProposalsScreen extends React.Component {
                 houstecaFeeAmount, created
             } = proposal;
             const yearlyInterest = fromRatio(parseFloat(perPaymentInterestRatio) * 12);
-            const date = new Date(created * 1000).toISOString().split('T')[0];
+            const date = parseDatetime(created);
             return (
                 <Card fluid key={index}>
                     <Card.Content>

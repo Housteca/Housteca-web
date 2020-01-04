@@ -17,7 +17,7 @@ const ImageViewer = props => {
     const images = props.images || [];
     return (
         <ViewPager tag="main">
-            <Frame className="frame" accesibility>
+            <Frame className="frame">
                 <Track
                     ref={c => track = c}
                     viewsToShow={2}
