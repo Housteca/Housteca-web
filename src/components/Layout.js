@@ -74,14 +74,23 @@ class Layout extends React.Component {
                     return {title: 'Inversión creada', description: data.borrower};
                 case 'AdminAdded':
                     return {title: 'Nuevo administrador', description: data.admin};
+                case 'AdminRemoved':
+                    return {title: 'Administrador eliminado', description: data.admin};
                 case 'TokenAdded':
                     return {title: 'Nuevo token', description: data.symbol};
+                case 'TokenRemoved':
+                    return {title: 'Token eliminado', description: data.symbol};
                 case 'InvestorAdded':
                     return {title: 'Nuevo inversor', description: data.investor};
+                case 'InvestorRemoved':
+                    return {title: 'Inversor eliminado', description: data.investor};
                 case 'InvestmentProposalCreated':
-                    return {title: 'Nueva proposición de inversión', description: data.borrower}
+                    return {title: 'Nueva proposición de inversión', description: data.borrower};
+                case 'InvestmentProposalRemoved':
+                    return {title: 'Proposición de inversión eliminada', description: data.borrower};
             }
-        });
+        })
+            .slice(0,20);
         this.setState({events: parsedEvents});
     };
 
