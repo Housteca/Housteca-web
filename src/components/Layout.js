@@ -10,7 +10,7 @@ import {
     Switch
 } from "react-router-dom";
 import { createBrowserHistory } from "history";
-import HomeScreen from "../screens/HomeScreen";
+import HomeScreen from "../screens/ViewInvestments";
 import CreateInvestmentProposalScreen from "../screens/CreateInvestmentProposalScreen";
 import ViewInvestmentProposalsScreen from "../screens/ViewInvestmentProposalsScreen";
 import InvestmentDetailScreen from "../screens/InvestmentDetailScreen";
@@ -61,7 +61,7 @@ class Layout extends React.Component {
                             {this.renderItems()}
                         </Menu>
                     </Grid.Column>
-                    <Grid.Column width={13}>
+                    <Grid.Column width={14}>
                         <Router history={this.history}>
                             <Switch>
                                 <Route path="/new">

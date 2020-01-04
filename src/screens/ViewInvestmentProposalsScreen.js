@@ -88,7 +88,6 @@ class ViewInvestmentProposalsScreen extends React.Component {
                 houstecaFeeAmount, created
             } = proposal;
             const yearlyInterest = fromRatio(parseFloat(perPaymentInterestRatio) * 12);
-            console.log(yearlyInterest);
             const date = new Date(created * 1000).toISOString().split('T')[0];
             return (
                 <Card fluid key={index}>

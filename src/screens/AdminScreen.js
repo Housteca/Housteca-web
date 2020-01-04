@@ -87,7 +87,7 @@ class AdminScreen extends React.Component {
                     <br/>
                     <ConfigurationField placeholder="Comisión"
                                         onChange={event => this.setState({houstecaFeeRatio: event.target.value})}
-                                        label="% comisión for Housteca"
+                                        label="% comisión Housteca"
                                         type="number"
                                         onClick={this.changeHoustecaFeeRatio}
                                         defaultValue={houstecaFeeRatio}/>
