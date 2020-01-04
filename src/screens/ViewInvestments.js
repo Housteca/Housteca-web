@@ -53,10 +53,10 @@ class ViewInvestments extends React.Component {
                 <Card fluid key={index} as="a" href={`/details/${loanAddress}`}>
                     <Card.Content>
                         <Grid>
-                            <Grid.Column width={3}>
+                            <Grid.Column width={4}>
                                 <Image src={images[0]}/>
                             </Grid.Column>
-                            <Grid.Column width={13}>
+                            <Grid.Column width={12}>
                                 <Card.Header>{loanAddress}</Card.Header>
                                 <br/>
                                 <List horizontal>

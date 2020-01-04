@@ -1,7 +1,9 @@
 import React from 'react';
 import AppHeader from "./AppHeader";
 import {
+    Card,
     Grid,
+    Header,
     Menu
 } from "semantic-ui-react";
 import {
@@ -15,10 +17,11 @@ import CreateInvestmentProposalScreen from "../screens/CreateInvestmentProposalS
 import ViewInvestmentProposalsScreen from "../screens/ViewInvestmentProposalsScreen";
 import InvestmentDetailScreen from "../screens/InvestmentDetailScreen";
 import AdminScreen from "../screens/AdminScreen";
+import { getHoustecaContract } from "../utils/contracts";
 
 
 class Layout extends React.Component {
-    state = {activeItem: 2};
+    state = {activeItem: 2, events: []};
     history = createBrowserHistory();
     items = [
         {title: 'nueva proposición de financiación', path: '/new'},
@@ -44,12 +47,43 @@ class Layout extends React.Component {
         );
     };
 
-    componentDidMount() {
+    renderEvents = () => {
+        return this.state.events.map(({title, description}) => {
+            return (
+                <Card fluid>
+                    <Card.Content>
+                        <Card.Header>{title}</Card.Header>
+                        <Card.Meta>{description}</Card.Meta>
+                    </Card.Content>
+                </Card>
+            )
+        });
+    };
+
+    componentDidMount = async () => {
         const index = this.items.map(i => i.path).indexOf(this.history.location.pathname);
         if (index >= 0) {
             this.setState({activeItem: index});
         }
-    }
+        const contract = await getHoustecaContract();
+        const events = await contract.getPastEvents('allEvents', {fromBlock: 0});
+        const parsedEvents = events.reverse().map(event => {
+            const data = event.returnValues;
+            switch (event.event) {
+                case 'InvestmentCreated':
+                    return {title: 'Inversión creada', description: data.borrower};
+                case 'AdminAdded':
+                    return {title: 'Nuevo administrador', description: data.admin};
+                case 'TokenAdded':
+                    return {title: 'Nuevo token', description: data.symbol};
+                case 'InvestorAdded':
+                    return {title: 'Nuevo inversor', description: data.investor};
+                case 'InvestmentProposalCreated':
+                    return {title: 'Nueva proposición de inversión', description: data.borrower}
+            }
+        });
+        this.setState({events: parsedEvents});
+    };
 
     render() {
         return (
@@ -61,7 +95,7 @@ class Layout extends React.Component {
                             {this.renderItems()}
                         </Menu>
                     </Grid.Column>
-                    <Grid.Column width={14}>
+                    <Grid.Column width={10}>
                         <Router history={this.history}>
                             <Switch>
                                 <Route path="/new">
@@ -70,7 +104,7 @@ class Layout extends React.Component {
                                 <Route path="/proposals">
                                     <ViewInvestmentProposalsScreen/>
                                 </Route>
-                                <Route path="/detail">
+                                <Route path="/details">
                                     <InvestmentDetailScreen/>
                                 </Route>
                                 <Route path="/admin">
@@ -81,6 +115,10 @@ class Layout extends React.Component {
                                 </Route>
                             </Switch>
                         </Router>
+                    </Grid.Column>
+                    <Grid.Column width={4}>
+                        <Header as="h2">Últimos eventos</Header>
+                        {this.renderEvents()}
                     </Grid.Column>
                 </Grid>
             </div>
