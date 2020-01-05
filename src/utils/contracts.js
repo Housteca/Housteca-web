@@ -1,5 +1,6 @@
 import Loan from "../contracts/Loan";
 import Housteca from "../contracts/Housteca";
+import ERC20 from "../contracts/ERC20";
 import { getWeb3 } from "./web3";
 
 const getContract = async (contract, address) => {
@@ -14,7 +15,13 @@ const getContract = async (contract, address) => {
 
 export const getHoustecaContract = async () => await getContract(Housteca);
 export const getLoanContract = async address => await getContract(Loan, address);
-export const parseDatetime = datetime => new Date(datetime * 1000).toISOString().split('T')[0];
+export const getERC20Contract = async address => await getContract(ERC20, address);
+export const parseDatetime = datetime => {
+    if (!datetime || datetime === '0') {
+        return '-';
+    }
+    return new Date(datetime * 1000).toISOString().split('T')[0];
+};
 export const parseStatus = status => {
     switch(parseInt(status)) {
         case 0:  // AWAITING_STAKE

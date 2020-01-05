@@ -48,9 +48,9 @@ class Layout extends React.Component {
     };
 
     renderEvents = () => {
-        return this.state.events.map(({title, description}) => {
+        return this.state.events.map(({title, description}, index) => {
             return (
-                <Card fluid key={title}>
+                <Card fluid key={index}>
                     <Card.Content>
                         <Card.Header>{title}</Card.Header>
                         <Card.Meta>{description}</Card.Meta>

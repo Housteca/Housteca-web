@@ -1,6 +1,7 @@
 import React from 'react';
 import { withRouter } from "react-router-dom";
 import {
+    getERC20Contract,
     getLoanContract,
     parseDatetime,
     parseStatus
@@ -9,20 +10,26 @@ import emptyImage from "../images/empty.png";
 import ImageViewer from "../components/ImageViewer";
 import {
     Button,
-    List,
-    Table
+    List
 } from "semantic-ui-react";
 import {
     fromAmount,
     fromRatio,
-    getDefaultAccount
+    getDefaultAccount,
+    toAmount
 } from "../utils/web3";
+import ConfigurationField from "../components/ConfigurationField";
 
 
 class InvestmentDetailScreen extends React.Component {
     state = {
         contract: null,
         images: [],
+        isBorrower: false,
+        isInvestor: false,
+        isLocalNode: false,
+        isVerifiedInvestor: false,
+        token: null,
         borrower: '',
         status: '',
         localNode: '',
@@ -31,7 +38,7 @@ class InvestmentDetailScreen extends React.Component {
         timesPaid: '',
         timesDefault: '',
         nextPayment: '',
-        stakeDepositDeadLine: '',
+        stakeDepositDeadline: '',
         fundingDeadline: '',
         signingDeadline: '',
         insuredPayments: '',
@@ -45,6 +52,9 @@ class InvestmentDetailScreen extends React.Component {
         documentHash: '',
         localNodeFeeAmount: '',
         houstecaFeeAmount: '',
+        input: {
+            amountToInvest: '0'
+        }
     };
 
     componentDidMount = async () => {
@@ -81,6 +91,8 @@ class InvestmentDetailScreen extends React.Component {
         const documentHash = await contract.methods._documentHash().call();
         const localNodeFeeAmount = await contract.methods._localNodeFeeAmount().call();
         const houstecaFeeAmount = await contract.methods._houstecaFeeAmount().call();
+        const tokenAddress = await contract.methods._token().call();
+        const token = await getERC20Contract(tokenAddress);
 
         const isLocalNode = account === localNode;
         const isBorrower = account === borrower;
@@ -88,7 +100,7 @@ class InvestmentDetailScreen extends React.Component {
         const amountInvested = await contract.methods._investments(account).call();
         const isInvestor = amountInvested > 0;
         this.setState({
-            account, isLocalNode, isBorrower, isVerifiedInvestor, isInvestor, amountInvested,
+            account, isLocalNode, isBorrower, isVerifiedInvestor, isInvestor, amountInvested, token,
             borrower, status, localNode, targetAmount, totalPayments, timesPaid, timesDefault,
             nextPayment, stakeDepositDeadline, fundingDeadline, signingDeadline, insuredPayments,
             downpaymentRatio, perPaymentInterestRatio, amortizedAmount, investedAmount, paymentAmount,
@@ -96,21 +108,59 @@ class InvestmentDetailScreen extends React.Component {
         })
     };
 
-    sendStake = async () => {
-
+    allow = async amount => {
+        const {contract, account, token} = this.state;
+        await token.methods.approve(contract._address, amount).send({from: account});
     };
 
-    renderImageViewer = () => {
+    sendStake = async () => {
+        const {contract, account} = this.state;
+        const amount = await contract.methods.initialStakeAmount().call();
+        await this.allow(amount);
+        await contract.methods.sendInitialStake().send({from: account});
+    };
+
+    invest = async () => {
+        const {account, contract, input} = this.state;
+        const amount = toAmount(input.amountToInvest);
+        await this.allow(amount);
+        await contract.methods.invest(amount).send({from: account});
+    };
+
+    collectInvestment = async () => {
+        const {contract, account} = this.state;
+        await contract.methods.collectInvestment().send({from: account});
+    };
+
+    pay = async () => {
+        const {contract, account, paymentAmount} = this.state;
+        await this.allow(paymentAmount);
+        await contract.methods.pay(paymentAmount).send({from: account});
+    };
+
+    abort = async () => {
+        const {contract, account} = this.state;
+        await contract.methods.abortLoan().send({from: account});
+    };
+
+    renderImageViewer() {
         const {images} = this.state;
         if (images.length  > 0) {
             return <ImageViewer images={images}/>;
         }
     };
 
-    renderButtons = () => {
-        const {status, isLocalNode, isBorrower, isInvestor} = this.state;
-        console.log(status, isBorrower);
-        switch (status) {
+    renderInvestorCollectButton() {
+        return (
+            <Button onClick={this.collectInvestment} color="green">
+                Collect investment
+            </Button>
+        );
+    }
+
+    renderWidgets = () => {
+        const {status, isLocalNode, isBorrower, isInvestor, isVerifiedInvestor, input} = this.state;
+        switch (parseInt(status)) {
             case 0:  // AWAITING_STAKE
                 if (isBorrower) {
                     return (
@@ -120,17 +170,61 @@ class InvestmentDetailScreen extends React.Component {
                     );
                 }
                 break;
+            case 1:  // FUNDING
+                if (isVerifiedInvestor) {
+                    return (
+                        <ConfigurationField placeholder="Cantidad a invertir"
+                                            onChange={event => this.setState({input: {...input, amountToInvest: event.target.value}})}
+                                            label="Invertir"
+                                            onClick={this.invest}/>
+                    );
+                } else if (isLocalNode) {
+                    return (
+                        <Button onClick={this.abort} color="red">
+                            Abortar proceso
+                        </Button>
+                    );
+                }
+                break;
+            case 2:  // AWAITING_SIGNATURES
+                if (isLocalNode) {
+                    // firmar, cancelar proceso y subir hash del documento
+                } else if (isBorrower) {
+                    // firmar
+                }
+                break;
+            case 3:  // ACTIVE
+            case 6:  // DEFAULT
+                if (isInvestor) {
+                    this.renderInvestorCollectButton();
+                } else if (isBorrower) {
+                    return (
+                        <Button onClick={this.pay} color="green">
+                            Pagar
+                        </Button>
+                    );
+                }
+                break;
+            case 4:  // FINISHED
+            case 5:  // UNCOMPLETED
+            case 7:  // BANKRUPT
+                if (isInvestor) {
+                    this.renderInvestorCollectButton();
+                }
+                break;
 
         }
     };
 
     render() {
-        const {borrower, status, localNode, targetAmount, totalPayments, timesPaid, timesDefault,
-        nextPayment, stakeDepositDeadLine, fundingDeadline, signingDeadline, insuredPayments,
+        let {borrower, status, localNode, targetAmount, totalPayments, timesPaid, timesDefault,
+        nextPayment, stakeDepositDeadline, fundingDeadline, signingDeadline, insuredPayments,
         downpaymentRatio, paymentAmount, perPaymentInterestRatio, amortizedAmount, investedAmount,
         localNodeSignature, borrowerSignature, documentHash, localNodeFeeAmount, houstecaFeeAmount} = this.state;
         const yearlyInterest = fromRatio(parseFloat(perPaymentInterestRatio) * 12);
-        console.log(stakeDepositDeadLine, fundingDeadline, signingDeadline);
+        if (documentHash === '0x0000000000000000000000000000000000000000000000000000000000000000') {
+            documentHash = '-';
+        }
         return (
             <div>
                 {this.renderImageViewer()}
@@ -191,12 +285,12 @@ class InvestmentDetailScreen extends React.Component {
                         <List.Description>{timesDefault}</List.Description>
                     </List.Item>
                     <List.Item>
-                        <List.Header>Fecha stake</List.Header>
-                        <List.Description>{parseDatetime(stakeDepositDeadLine)}</List.Description>
+                        <List.Header>Próximo pago</List.Header>
+                        <List.Description>{parseDatetime(nextPayment)}</List.Description>
                     </List.Item>
                     <List.Item>
-                        <List.Header>Próximo pago</List.Header>
-                        <List.Description>{nextPayment}</List.Description>
+                        <List.Header>Fecha stake</List.Header>
+                        <List.Description>{parseDatetime(stakeDepositDeadline)}</List.Description>
                     </List.Item>
                     <List.Item>
                         <List.Header>Fecha inversión</List.Header>
@@ -227,18 +321,18 @@ class InvestmentDetailScreen extends React.Component {
                     </List.Item>
                     <List.Item>
                         <List.Header>Firma nodo local</List.Header>
-                        <List.Description>{localNodeSignature}</List.Description>
+                        <List.Description>{localNodeSignature || '-'}</List.Description>
                     </List.Item>
                     <List.Item>
                         <List.Header>Firma prestatario</List.Header>
-                        <List.Description>{borrowerSignature}</List.Description>
+                        <List.Description>{borrowerSignature || '-'}</List.Description>
                     </List.Item>
                 </List>
 
                 <br/>
                 <br/>
 
-                {this.renderButtons()}
+                {this.renderWidgets()}
             </div>
         );
     }
