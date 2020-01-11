@@ -47,7 +47,7 @@ export const getWeb3 = () =>
 export const getDefaultAccount = async () => {
     const web3 = await getWeb3();
     const accounts = await web3.eth.getAccounts();
-    return accounts[0];
+    return web3.utils.toChecksumAddress(accounts[0]);
 };
 
 export const toAmount = s => (s * 1e18).toLocaleString('fullwide', {useGrouping:false});

@@ -25,10 +25,10 @@ class ViewInvestmentProposalsScreen extends React.Component {
 
     loadProposals = async () => {
         const contract = await getHoustecaContract();
-        const proposals = [];
+        let proposals = [];
         const events = await contract.getPastEvents('InvestmentProposalCreated', {fromBlock: 0});
         const keys = new Set([]);
-        for (const event of events) {
+        for (const event of events.reverse()) {
             const borrower = event.returnValues.borrower;
             if (!keys.has(borrower)) {
                 keys.add(borrower);

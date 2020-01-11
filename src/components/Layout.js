@@ -88,6 +88,8 @@ class Layout extends React.Component {
                     return {title: 'Nueva proposición de inversión', description: data.borrower};
                 case 'InvestmentProposalRemoved':
                     return {title: 'Proposición de inversión eliminada', description: data.borrower};
+                default:
+                    return null;
             }
         }).slice(0,20);
         this.setState({events: parsedEvents});

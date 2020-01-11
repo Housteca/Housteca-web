@@ -40,7 +40,6 @@ class CreateInvestmentProposalScreen extends React.Component {
         } = this.state;
         const perPaymentInterestRatio = yearlyInterest / 12;
         const paymentAmount = (targetAmount * perPaymentInterestRatio/100) / (1 - Math.pow(1 + perPaymentInterestRatio/100, -totalPayments));
-        console.log(paymentAmount);
         await this.state.contract.methods.createInvestmentProposal(
             borrower,
             symbol,

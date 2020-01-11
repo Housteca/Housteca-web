@@ -19,7 +19,10 @@ import {
     toAmount
 } from "../utils/web3";
 import ConfigurationField from "../components/ConfigurationField";
+import { uploadFile } from "../backend";
 
+
+const EMPTY_DOCUMENT = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 class InvestmentDetailScreen extends React.Component {
     state = {
@@ -118,6 +121,7 @@ class InvestmentDetailScreen extends React.Component {
         const amount = await contract.methods.initialStakeAmount().call();
         await this.allow(amount);
         await contract.methods.sendInitialStake().send({from: account});
+        window.location.reload();
     };
 
     invest = async () => {
@@ -125,6 +129,7 @@ class InvestmentDetailScreen extends React.Component {
         const amount = toAmount(input.amountToInvest);
         await this.allow(amount);
         await contract.methods.invest(amount).send({from: account});
+        window.location.reload();
     };
 
     collectInvestment = async () => {
@@ -141,6 +146,11 @@ class InvestmentDetailScreen extends React.Component {
     abort = async () => {
         const {contract, account} = this.state;
         await contract.methods.abortLoan().send({from: account});
+        window.location.reload();
+    };
+
+    uploadDocument = async file => {
+        await uploadFile(file);
     };
 
     renderImageViewer() {
@@ -159,7 +169,8 @@ class InvestmentDetailScreen extends React.Component {
     }
 
     renderWidgets = () => {
-        const {status, isLocalNode, isBorrower, isInvestor, isVerifiedInvestor, input} = this.state;
+        const {status, isLocalNode, isBorrower, isInvestor, isVerifiedInvestor, input, documentHash,
+        borrowerSignature, localNodeSignature} = this.state;
         switch (parseInt(status)) {
             case 0:  // AWAITING_STAKE
                 if (isBorrower) {
@@ -188,8 +199,21 @@ class InvestmentDetailScreen extends React.Component {
                 break;
             case 2:  // AWAITING_SIGNATURES
                 if (isLocalNode) {
+                    if (documentHash === EMPTY_DOCUMENT) {
+                        return (
+                            <div>
+                                <Button htmlFor="file" as="label" color="blue">
+                                    Subir contrato
+                                </Button>
+                                <input type="file" id="file" style={{ display: "none" }}
+                                       onChange={event => this.uploadDocument(event.target.files[0])} />
+                            </div>
+                        );
+                    } else if (!localNodeSignature) {
+
+                    }
                     // firmar, cancelar proceso y subir hash del documento
-                } else if (isBorrower) {
+                } else if (isBorrower && !borrowerSignature) {
                     // firmar
                 }
                 break;
@@ -200,7 +224,7 @@ class InvestmentDetailScreen extends React.Component {
                 } else if (isBorrower) {
                     return (
                         <Button onClick={this.pay} color="green">
-                            Pagar
+                            Pagar mensualidad
                         </Button>
                     );
                 }
@@ -222,7 +246,7 @@ class InvestmentDetailScreen extends React.Component {
         downpaymentRatio, paymentAmount, perPaymentInterestRatio, amortizedAmount, investedAmount,
         localNodeSignature, borrowerSignature, documentHash, localNodeFeeAmount, houstecaFeeAmount} = this.state;
         const yearlyInterest = fromRatio(parseFloat(perPaymentInterestRatio) * 12);
-        if (documentHash === '0x0000000000000000000000000000000000000000000000000000000000000000') {
+        if (documentHash === EMPTY_DOCUMENT) {
             documentHash = '-';
         }
         return (

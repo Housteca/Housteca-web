@@ -4,7 +4,7 @@
   "private": true,
   "homepage": "./",
   "dependencies": {
-    "axios": "^0.19.0",
+    "axios": "^0.19.1",
     "eslint": "^6.6.0",
     "history": "latest",
     "react": "^16.11.0",
