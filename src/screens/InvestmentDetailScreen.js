@@ -16,6 +16,7 @@ import {
     fromAmount,
     fromRatio,
     getDefaultAccount,
+    getWeb3,
     toAmount
 } from "../utils/web3";
 import ConfigurationField from "../components/ConfigurationField";
@@ -150,7 +151,27 @@ class InvestmentDetailScreen extends React.Component {
     };
 
     uploadDocument = async file => {
-        await uploadFile(file);
+        const documentHash = await uploadFile(file);
+        const {contract, account} = this.state;
+        await contract.methods.submitDocumentHash(documentHash).send({from: account});
+        this.setState({documentHash});
+    };
+
+    signDocument = async () => {
+        const {account, contract, documentHash} = this.state;
+        if (documentHash && documentHash !== EMPTY_DOCUMENT) {
+            const web3 = await getWeb3();
+            const msg =  web3.eth.accounts.hashMessage(documentHash);
+            const signature = await web3.eth.sign(msg, account);
+            await contract.methods.signDocument(signature).send({from: account});
+            window.location.reload();
+        }
+    };
+
+    collectAllFunds = async () => {
+        const {contract, account} = this.state;
+        await contract.methods.collectAllFunds().send({from: account});
+        window.location.reload();
     };
 
     renderImageViewer() {
@@ -164,6 +185,14 @@ class InvestmentDetailScreen extends React.Component {
         return (
             <Button onClick={this.collectInvestment} color="green">
                 Collect investment
+            </Button>
+        );
+    }
+
+    renderSignDocumentButton() {
+        return (
+            <Button color="green" onClick={this.signDocument} key="sign">
+                Firmar documento
             </Button>
         );
     }
@@ -198,23 +227,44 @@ class InvestmentDetailScreen extends React.Component {
                 }
                 break;
             case 2:  // AWAITING_SIGNATURES
+                const components = [];
                 if (isLocalNode) {
-                    if (documentHash === EMPTY_DOCUMENT) {
-                        return (
-                            <div>
-                                <Button htmlFor="file" as="label" color="blue">
-                                    Subir contrato
-                                </Button>
-                                <input type="file" id="file" style={{ display: "none" }}
-                                       onChange={event => this.uploadDocument(event.target.files[0])} />
-                            </div>
+                    components.push(
+                        <div key="document-upload">
+                            <Button htmlFor="file" as="label" color="blue">
+                                Subir contrato
+                            </Button>
+                            <input type="file" id="file" style={{ display: "none" }}
+                                   onChange={event => this.uploadDocument(event.target.files[0])} />
+                        </div>
+                    );
+                    components.push(
+                        <Button color="red" onClick={this.abort} key="abort-process">
+                            Abortar proceso
+                        </Button>
+                    );
+                    if (!localNodeSignature) {
+                        components.push(
+                            this.renderSignDocumentButton()
+                        )
+                    } else if (borrowerSignature) {
+                        components.push(
+                            <Button color="green" onClick={this.collectAllFunds} key="collect-all-funds">
+                                Comenzar proceso de financiación
+                            </Button>
                         );
-                    } else if (!localNodeSignature) {
-
                     }
-                    // firmar, cancelar proceso y subir hash del documento
                 } else if (isBorrower && !borrowerSignature) {
-                    // firmar
+                    components.push(
+                        this.renderSignDocumentButton()
+                    )
+                }
+                if (components.length > 0) {
+                    return (
+                        <List horizontal>
+                            {components.map(c => <List.Item>{c}</List.Item>)}
+                        </List>
+                    )
                 }
                 break;
             case 3:  // ACTIVE
@@ -354,6 +404,7 @@ class InvestmentDetailScreen extends React.Component {
                 </List>
 
                 <br/>
+                <hr/>
                 <br/>
 
                 {this.renderWidgets()}

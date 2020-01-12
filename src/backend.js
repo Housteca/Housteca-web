@@ -49,7 +49,8 @@ export const uploadFile = async file => {
     headers['Content-Type'] = 'multipart/form-data';
     const formData = new FormData();
     formData.append('file', file);
-    await axios.post(`${BASE_URL}/api/v1/documents/`, formData, {headers});
+    const response = await axios.post(`${BASE_URL}/api/v1/documents/`, formData, {headers});
+    return response.data.hash;
 };
 
 
