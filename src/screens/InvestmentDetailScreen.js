@@ -64,7 +64,7 @@ class InvestmentDetailScreen extends React.Component {
     componentDidMount = async () => {
         const contractAddress = this.props.location.pathname.replace('/details/', '').replace('/', '');
         const contract = await getLoanContract(contractAddress);
-        let images = await contract.methods.images().call();
+        let images = await contract.methods.images().call() || [];
         if (images.length === 0) {
             images = [emptyImage];
         } else {
