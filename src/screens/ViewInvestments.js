@@ -23,7 +23,7 @@ class ViewInvestments extends React.Component {
 
     componentDidMount = async () => {
         const housteca = await getHoustecaContract();
-        const loanAddresses = await housteca.methods.loans().call();
+        const loanAddresses = await housteca.methods.loans().call() || [];
         const loans = [];
         for (let address of loanAddresses) {
             const loan = await getLoanContract(address);

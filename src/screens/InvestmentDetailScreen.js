@@ -211,7 +211,9 @@ class InvestmentDetailScreen extends React.Component {
                 }
                 break;
             case 1:  // FUNDING
-                if (isVerifiedInvestor) {
+                if (isInvestor) {
+                    this.renderInvestorCollectButton();
+                } else if (isVerifiedInvestor) {
                     return (
                         <ConfigurationField placeholder="Cantidad a invertir"
                                             onChange={event => this.setState({input: {...input, amountToInvest: event.target.value}})}
@@ -243,7 +245,7 @@ class InvestmentDetailScreen extends React.Component {
                             Abortar proceso
                         </Button>
                     );
-                    if (!localNodeSignature) {
+                    if (documentHash !== EMPTY_DOCUMENT && !localNodeSignature) {
                         components.push(
                             this.renderSignDocumentButton()
                         )

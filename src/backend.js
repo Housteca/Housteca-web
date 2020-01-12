@@ -60,8 +60,10 @@ export const login = async () => {
     try {
         await axios.get(`${BASE_URL}/api/v1/users/${account}`, {headers});
     } catch (e) {
+        const num = Math.ceil(Math.random() * 1000);
         const data = {
-            email: 'test@test.com',
+            username: `user${num}`,
+            email: `test${num}@test.com`,
             first_name: 'test_first_name',
             last_name: 'test_last_name',
             address: account,
