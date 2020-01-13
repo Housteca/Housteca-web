@@ -141,7 +141,7 @@ class InvestmentDetailScreen extends React.Component {
     pay = async () => {
         const {contract, account, paymentAmount} = this.state;
         await this.allow(paymentAmount);
-        await contract.methods.pay(paymentAmount).send({from: account});
+        await contract.methods.pay().send({from: account});
     };
 
     abort = async () => {
