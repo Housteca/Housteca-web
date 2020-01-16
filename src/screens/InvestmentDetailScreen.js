@@ -96,6 +96,7 @@ class InvestmentDetailScreen extends React.Component {
         const localNodeFeeAmount = await contract.methods._localNodeFeeAmount().call();
         const houstecaFeeAmount = await contract.methods._houstecaFeeAmount().call();
         const tokenAddress = await contract.methods._token().call();
+        const shouldUpdate = await contract.methods.shouldUpdate().call();
         const token = await getERC20Contract(tokenAddress);
 
         const isLocalNode = account === localNode;
@@ -105,7 +106,7 @@ class InvestmentDetailScreen extends React.Component {
         const isInvestor = amountInvested > 0;
         this.setState({
             account, isLocalNode, isBorrower, isVerifiedInvestor, isInvestor, amountInvested, token,
-            borrower, status, localNode, targetAmount, totalPayments, timesPaid, timesDefault,
+            borrower, status, localNode, targetAmount, totalPayments, timesPaid, timesDefault, shouldUpdate,
             nextPayment, stakeDepositDeadline, fundingDeadline, signingDeadline, insuredPayments,
             downpaymentRatio, perPaymentInterestRatio, amortizedAmount, investedAmount, paymentAmount,
             localNodeSignature,borrowerSignature, documentHash, localNodeFeeAmount, houstecaFeeAmount
@@ -138,10 +139,16 @@ class InvestmentDetailScreen extends React.Component {
         await contract.methods.collectInvestment().send({from: account});
     };
 
+    collectEarnings = async () => {
+        const {contract, account} = this.state;
+        await contract.methods.collectEarnings().send({from: account});
+    };
+
     pay = async () => {
         const {contract, account, paymentAmount} = this.state;
         await this.allow(paymentAmount);
         await contract.methods.pay().send({from: account});
+        window.location.reload();
     };
 
     abort = async () => {
@@ -174,6 +181,12 @@ class InvestmentDetailScreen extends React.Component {
         window.location.reload();
     };
 
+    updateContract = async () => {
+        const {contract, account} = this.state;
+        await contract.methods.update().send({from: account});
+        window.location.reload();
+    };
+
     renderImageViewer() {
         const {images} = this.state;
         if (images.length  > 0) {
@@ -181,17 +194,25 @@ class InvestmentDetailScreen extends React.Component {
         }
     };
 
-    renderInvestorCollectButton() {
+    renderInvestorCollectInvestmentButton() {
         return (
-            <Button onClick={this.collectInvestment} color="green">
-                Collect investment
+            <Button onClick={this.collectInvestment} color="green" key="collect-investment-button">
+                Retirar fondos
+            </Button>
+        );
+    }
+
+    renderInvestorCollectEarningsButton() {
+        return (
+            <Button onClick={this.collectEarnings} color="green" key="collect-earnings-button">
+                Cobrar mensualidad
             </Button>
         );
     }
 
     renderSignDocumentButton() {
         return (
-            <Button color="green" onClick={this.signDocument} key="sign">
+            <Button color="green" onClick={this.signDocument} key="sign-document-button">
                 Firmar documento
             </Button>
         );
@@ -199,12 +220,13 @@ class InvestmentDetailScreen extends React.Component {
 
     renderWidgets = () => {
         const {status, isLocalNode, isBorrower, isInvestor, isVerifiedInvestor, input, documentHash,
-        borrowerSignature, localNodeSignature} = this.state;
+        borrowerSignature, localNodeSignature, shouldUpdate} = this.state;
+        const components = [];
         switch (parseInt(status)) {
             case 0:  // AWAITING_STAKE
                 if (isBorrower) {
-                    return (
-                        <Button onClick={this.sendStake} color="green">
+                    components.push(
+                        <Button key="send-initial-stake-button" onClick={this.sendStake} color="green">
                             Enviar stake inicial
                         </Button>
                     );
@@ -212,24 +234,24 @@ class InvestmentDetailScreen extends React.Component {
                 break;
             case 1:  // FUNDING
                 if (isInvestor) {
-                    this.renderInvestorCollectButton();
+                    this.renderInvestorCollectInvestmentButton();
                 } else if (isVerifiedInvestor) {
-                    return (
+                    components.push(
                         <ConfigurationField placeholder="Cantidad a invertir"
                                             onChange={event => this.setState({input: {...input, amountToInvest: event.target.value}})}
                                             label="Invertir"
+                                            key="invest-button"
                                             onClick={this.invest}/>
                     );
                 } else if (isLocalNode) {
-                    return (
-                        <Button onClick={this.abort} color="red">
+                    components.push(
+                        <Button onClick={this.abort} color="red" key="abort-process-button-1">
                             Abortar proceso
                         </Button>
                     );
                 }
                 break;
             case 2:  // AWAITING_SIGNATURES
-                const components = [];
                 if (isLocalNode) {
                     components.push(
                         <div key="document-upload">
@@ -241,7 +263,7 @@ class InvestmentDetailScreen extends React.Component {
                         </div>
                     );
                     components.push(
-                        <Button color="red" onClick={this.abort} key="abort-process">
+                        <Button color="red" onClick={this.abort} key="abort-process-button-2">
                             Abortar proceso
                         </Button>
                     );
@@ -256,25 +278,20 @@ class InvestmentDetailScreen extends React.Component {
                             </Button>
                         );
                     }
-                } else if (isBorrower && !borrowerSignature) {
+                } else if (isBorrower && !borrowerSignature && documentHash !== EMPTY_DOCUMENT) {
                     components.push(
                         this.renderSignDocumentButton()
-                    )
-                }
-                if (components.length > 0) {
-                    return (
-                        <List horizontal>
-                            {components.map(c => <List.Item>{c}</List.Item>)}
-                        </List>
                     )
                 }
                 break;
             case 3:  // ACTIVE
             case 6:  // DEFAULT
                 if (isInvestor) {
-                    this.renderInvestorCollectButton();
+                    components.push(
+                        this.renderInvestorCollectEarningsButton()
+                    );
                 } else if (isBorrower) {
-                    return (
+                    components.push(
                         <Button onClick={this.pay} color="green">
                             Pagar mensualidad
                         </Button>
@@ -285,10 +302,29 @@ class InvestmentDetailScreen extends React.Component {
             case 5:  // UNCOMPLETED
             case 7:  // BANKRUPT
                 if (isInvestor) {
-                    this.renderInvestorCollectButton();
+                    components.push(
+                        this.renderInvestorCollectEarningsButton()
+                    );
                 }
                 break;
+            default:
+                break;
+        }
 
+        if (shouldUpdate) {
+            components.push(
+                <Button key="update-contract-button" color="blue" onClick={this.updateContract}>
+                    Actualizar contrato
+                </Button>
+            );
+        }
+
+        if (components.length > 0) {
+            return (
+                <List horizontal>
+                    {components.map(c => <List.Item>{c}</List.Item>)}
+                </List>
+            );
         }
     };
 
