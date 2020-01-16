@@ -42,16 +42,19 @@ const checkToken = async () => {
     }
 };
 
-
-export const uploadFile = async file => {
+const upload = async (file, url) => {
     await checkToken();
     const headers = buildHeaders();
     headers['Content-Type'] = 'multipart/form-data';
     const formData = new FormData();
     formData.append('file', file);
-    const response = await axios.post(`${BASE_URL}/api/v1/documents/`, formData, {headers});
+    const response = await axios.post(url, formData, {headers});
     return response.data.hash;
 };
+
+
+export const uploadDocument = async file => upload(file, `${BASE_URL}/api/v1/documents/`);
+export const uploadImage = async file => upload(file, `${BASE_URL}/api/v1/images/`);
 
 
 export const login = async () => {

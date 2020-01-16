@@ -20,7 +20,13 @@ import {
     toAmount
 } from "../utils/web3";
 import ConfigurationField from "../components/ConfigurationField";
-import { uploadFile } from "../backend";
+import {
+    uploadDocument,
+    uploadImage
+} from "../backend";
+
+
+const IPFS_PATH = 'https://ipfs.io/ipfs/';
 
 
 const EMPTY_DOCUMENT = '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -68,7 +74,7 @@ class InvestmentDetailScreen extends React.Component {
         if (images.length === 0) {
             images = [emptyImage];
         } else {
-            images = images.map(hash => `https://ipfs.io/ipfs/${hash}`);
+            images = images.map(hash => `${IPFS_PATH}${hash}`);
         }
         this.setState({contract, images});
 
@@ -158,7 +164,7 @@ class InvestmentDetailScreen extends React.Component {
     };
 
     uploadDocument = async file => {
-        const documentHash = await uploadFile(file);
+        const documentHash = await uploadDocument(file);
         const {contract, account} = this.state;
         await contract.methods.submitDocumentHash(documentHash).send({from: account});
         this.setState({documentHash});
@@ -187,10 +193,18 @@ class InvestmentDetailScreen extends React.Component {
         window.location.reload();
     };
 
+    uploadPhoto = async file => {
+        const hash = await uploadImage(file);
+        const {contract, account, images} = this.state;
+        await contract.methods.addImage(hash).send({from: account});
+        images.push(`${IPFS_PATH}${hash}`);
+        this.setState({images});
+    };
+
     renderImageViewer() {
-        const {images} = this.state;
+        const {images, isBorrower} = this.state;
         if (images.length  > 0) {
-            return <ImageViewer images={images}/>;
+            return <ImageViewer images={images} canEdit={isBorrower} uploadFn={this.uploadPhoto}/>;
         }
     };
 
